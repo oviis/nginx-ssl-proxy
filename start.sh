@@ -25,7 +25,9 @@ fi
 if [ -n "${ENABLE_BASIC_AUTH+1}" ] && [ "${ENABLE_BASIC_AUTH,,}" = "true" ]; then
   echo "Enabling basic auth..."
   sed -i "s/#auth_basic/auth_basic/g;" /etc/nginx/conf.d/proxy.conf
+  sed -i "s/#proxy_set_header/proxy_set_header/g;" /etc/nginx/conf.d/proxy.conf
 fi
+
 
 # If the SERVICE_HOST_ENV_NAME and SERVICE_PORT_ENV_NAME vars are provided,
 # there are two options:

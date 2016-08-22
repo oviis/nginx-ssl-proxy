@@ -15,19 +15,19 @@
 #
 # VERSION   0.0.1
 
-FROM nginx
-
-MAINTAINER Evan Brown <evanbrown@google.com>
+FROM nginx:1.11.1-alpine
 
 RUN rm /etc/nginx/conf.d/*.conf
+
+RUN apk --update add bash
 
 RUN mkdir -p /etc/nginx/extra-conf.d
 
 WORKDIR /usr/src
 
-ADD start.sh /usr/src/
+COPY start.sh .
 ADD nginx/nginx.conf /etc/nginx/
 ADD nginx/proxy*.conf /usr/src/
 ADD nginx/extra/*.conf /etc/nginx/extra-conf.d/
 
-ENTRYPOINT ./start.sh
+ENTRYPOINT ["./start.sh"]
