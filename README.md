@@ -80,3 +80,64 @@ To run an SSL termination proxy you must have an existing SSL certificate and ke
     ```
 
    That way it is possible to setup additional proxies or modifying the nginx configuration.
+
+5. **nginx kubernetes ReplicationController example**
+
+```yaml
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: nginx-ssl-nexus
+  labels:
+    name: nginx-nexus
+    role: ssl-proxy-nexus
+spec:
+  replicas: 2
+  selector:
+    name: nginx-nexus
+    role: ssl-proxy-nexus
+  template:
+    metadata:
+      name: nginx-ssl-proxy
+      labels:
+        name: nginx-nexus
+        role: ssl-proxy-nexus
+    spec:
+      containers:
+      - name: nginx-ssl-proxy
+        image: oviis/nginx-ssl-proxy-k8s:v2
+        env:
+        - name: SERVICE_HOST_ENV_NAME
+          value: <YOUR_NEXUS_SERVICE_HOST>
+        - name: SERVICE_PORT_ENV_NAME
+          value: <YOUR_NEXUS_SERVICE_PORT_UI>
+        - name: ENABLE_SSL
+          value: 'true'
+        - name: ENABLE_BASIC_AUTH
+          value: 'false'
+        ports:
+        - name: ssl-proxy-http
+          containerPort: 80
+        - name: ssl-proxy-https
+          containerPort: 443
+        volumeMounts:
+        - name: secrets
+          mountPath: /etc/secrets
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: nginx-ssl-secret-prod
+```
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nginx-ssl-secret-prod
+data:
+  dhparam: <your dhparam content base64 coded >
+  proxycert: <your SSL proxycert content base64 coded >
+  htpasswd: <your htpasswd content file base64 coded>
+  proxykey: <your ssl key content file base64 coded >
+```
